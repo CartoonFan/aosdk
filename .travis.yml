@@ -11,6 +11,10 @@ addons:
   apt:
     packages:
     - libglfw3-dev
+  sonarcloud:
+    organization: "cartoonfan"
+    token:
+      secure: "DxeQeSDzWxGpYvgsfho+d/Oemn5G9yv8Oy/n4AT+oADuBAJw2mEqGl8iNZsqLDKFQ7WFcqHcDEaihPepFhVOOd2vm8E+dyqp5BBxcBBdgvyFSZekWgG2hVF3ryw79AGypjX/qWTrnqKOzKBHoS+yFAmp5pz186JksvIEP9VoU4PGpcRkGrKtBXJUq4AM2upW8xUhtT+6gbNATs0p372VaI6PMsqxJYYROtLOTHC/8xLGQ6MEk4mIlFU9LiPZBeAb5f5NJeObmxOdtip+PErnKjUx18xAd3oxPytqxwLu+MI9p7jZ5Ub2KDGpesOmr2UsCv3II94DMWZfE/vlLUkeKijuJnRz6S2yxpfRk7Z2hiyRAJMVy1k7C9A0pH21k4D1lH/cI9wtNOBudluGiTxbuAH0CkhlZj1zCDehunfbV4hfDb3C17SmIfeeAfKYCyQ9PXZy/OlDsrxKkcV1t1xhjAmZbXTPIZdXhk2SnOpVZei27xPUYpoxHGYxckcjxIeeMMzSj4SRIbvYr9lpcp0WIc4zDdfY3DYEBMS/etNMKj2uIXm5I1atTlMtnuYfC2miR62F8oqKuu4VCPD88XoqpVnHphLKQ/KGKJdjVsAMaRY1EcDkQsn2WMVklCNt9aBwnlYITVeRPqYiRcJPl017xk0gp2wQlJOjC3ltBk9WdCU="
     
 script:
   # Wraps the compilation with the Build Wrapper to generate configuration (used
@@ -19,3 +23,7 @@ script:
   # And finally run the SonarCloud analysis - read the "sonar-project.properties"
   # file to see the specific configuration
   - sonar-scanner -Dsonar.cfamily.build-wrapper-output=bw-output
+
+cache:
+  directories:
+    - '$HOME/.sonar/cache'
