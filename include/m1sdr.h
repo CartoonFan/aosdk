@@ -7,15 +7,10 @@
 #ifndef M1SDR_H
 #define M1SDR_H
 
-typedef enum {
-	M1SDR_OK,
-	M1SDR_ERROR,
-	M1SDR_WAIT
-} m1sdr_ret_t;
+typedef enum { M1SDR_OK, M1SDR_ERROR, M1SDR_WAIT } m1sdr_ret_t;
 
-typedef void m1sdr_callback_t(
-	unsigned long sample_count, stereo_sample_t *buffer
-);
+typedef void m1sdr_callback_t(unsigned long sample_count,
+                              stereo_sample_t *buffer);
 extern m1sdr_callback_t *m1sdr_Callback;
 
 extern ao_bool hw_present;
