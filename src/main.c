@@ -50,317 +50,296 @@ static wavedump_t song_dump;
 volatile ao_bool ao_song_done;
 
 static struct {
-    uint32 sig;
-    char *name;
-    int32 (*start)(uint8 *, uint32);
-    int32 (*sample)(stereo_sample_t *);
-    int32 (*frame)(void);
-    int32 (*stop)(void);
-    int32 (*command)(int32, int32);
-    uint32 rate;
-    int32 (*fillinfo)(ao_display_info *);
-} types[] = {{
-        0x50534641, "Capcom QSound (.qsf)", qsf_start, qsf_sample,
-        qsf_frame, qsf_stop, qsf_command, 60, qsf_fill_info
-    },
-    {   0x50534611, "Sega Saturn (.ssf)", ssf_start, ssf_sample,
-        ssf_frame, ssf_stop, ssf_command, 60, ssf_fill_info
-    },
-    {   0x50534601, "Sony PlayStation (.psf)", psf_start, psf_sample,
-        psf_frame, psf_stop, psf_command, 60, psf_fill_info
-    },
-    {   0x53505500, "Sony PlayStation (.spu)", spu_start, spu_sample,
-        spu_frame, spu_stop, spu_command, 60, spu_fill_info
-    },
-    {   0x50534602, "Sony PlayStation 2 (.psf2)", psf2_start, psf2_sample,
-        psf2_frame, psf2_stop, psf2_command, 60, psf2_fill_info
-    },
-    {   0x50534612, "Sega Dreamcast (.dsf)", dsf_start, dsf_sample,
-        dsf_frame, dsf_stop, dsf_command, 60, dsf_fill_info
-    },
+  uint32 sig;
+  char *name;
+  int32 (*start)(uint8 *, uint32);
+  int32 (*sample)(stereo_sample_t *);
+  int32 (*frame)(void);
+  int32 (*stop)(void);
+  int32 (*command)(int32, int32);
+  uint32 rate;
+  int32 (*fillinfo)(ao_display_info *);
+} types[] = {{0x50534641, "Capcom QSound (.qsf)", qsf_start, qsf_sample,
+              qsf_frame, qsf_stop, qsf_command, 60, qsf_fill_info},
+             {0x50534611, "Sega Saturn (.ssf)", ssf_start, ssf_sample,
+              ssf_frame, ssf_stop, ssf_command, 60, ssf_fill_info},
+             {0x50534601, "Sony PlayStation (.psf)", psf_start, psf_sample,
+              psf_frame, psf_stop, psf_command, 60, psf_fill_info},
+             {0x53505500, "Sony PlayStation (.spu)", spu_start, spu_sample,
+              spu_frame, spu_stop, spu_command, 60, spu_fill_info},
+             {0x50534602, "Sony PlayStation 2 (.psf2)", psf2_start, psf2_sample,
+              psf2_frame, psf2_stop, psf2_command, 60, psf2_fill_info},
+             {0x50534612, "Sega Dreamcast (.dsf)", dsf_start, dsf_sample,
+              dsf_frame, dsf_stop, dsf_command, 60, dsf_fill_info},
 
-    {0xffffffff, "", NULL, NULL, NULL, NULL, NULL, 0, NULL}
-};
+             {0xffffffff, "", NULL, NULL, NULL, NULL, NULL, 0, NULL}};
 
 #ifndef NOGUI
 static debug_hw_t *debug[] = {NULL, NULL, NULL, NULL, NULL, dc_debug};
 #endif
 
 /* redirect stubs to interface the Z80 core to the QSF engine */
-uint8 memory_read(uint16 addr) {
-    return qsf_memory_read(addr);
-}
+uint8 memory_read(uint16 addr) { return qsf_memory_read(addr); }
 
-uint8 memory_readop(uint16 addr) {
-    return memory_read(addr);
-}
+uint8 memory_readop(uint16 addr) { return memory_read(addr); }
 
-uint8 memory_readport(uint16 addr) {
-    return qsf_memory_readport(addr);
-}
+uint8 memory_readport(uint16 addr) { return qsf_memory_readport(addr); }
 
-void memory_write(uint16 addr, uint8 byte) {
-    qsf_memory_write(addr, byte);
-}
+void memory_write(uint16 addr, uint8 byte) { qsf_memory_write(addr, byte); }
 
 void memory_writeport(uint16 addr, uint8 byte) {
-    qsf_memory_writeport(addr, byte);
+  qsf_memory_writeport(addr, byte);
 }
 
 /* ao_get_lib: called to load secondary files */
 int ao_get_lib(const char *filename, uint8 **buffer, uint64 *length) {
-    uint8 *filebuf;
-    uint32 size;
-    FILE *auxfile;
+  uint8 *filebuf;
+  uint32 size;
+  FILE *auxfile;
 
-    auxfile = ao_fopen(filename, "rb");
-    if (!auxfile) {
-        printf("Unable to find auxiliary file %s\n", filename);
-        return AO_FAIL;
-    }
+  auxfile = ao_fopen(filename, "rb");
+  if (!auxfile) {
+    printf("Unable to find auxiliary file %s\n", filename);
+    return AO_FAIL;
+  }
 
-    fseek(auxfile, 0, SEEK_END);
-    size = ftell(auxfile);
-    fseek(auxfile, 0, SEEK_SET);
+  fseek(auxfile, 0, SEEK_END);
+  size = ftell(auxfile);
+  fseek(auxfile, 0, SEEK_SET);
 
-    filebuf = malloc(size);
+  filebuf = malloc(size);
 
-    if (!filebuf) {
-        fclose(auxfile);
-        printf("ERROR: could not allocate %d bytes of memory\n", size);
-        return AO_FAIL;
-    }
-
-    fread(filebuf, size, 1, auxfile);
+  if (!filebuf) {
     fclose(auxfile);
+    printf("ERROR: could not allocate %d bytes of memory\n", size);
+    return AO_FAIL;
+  }
 
-    *buffer = filebuf;
-    *length = (uint64)size;
+  fread(filebuf, size, 1, auxfile);
+  fclose(auxfile);
 
-    return AO_SUCCESS;
+  *buffer = filebuf;
+  *length = (uint64)size;
+
+  return AO_SUCCESS;
 }
 
 static void do_frame(unsigned long sample_count, stereo_sample_t *buffer) {
-    unsigned long i;
-    stereo_sample_t *p = buffer;
-    for (i = 0; i < sample_count; i++) {
-        (*types[type].sample)(p);
-        p++;
-    }
-    wavedump_append(&song_dump, sample_count * sizeof(stereo_sample_t), buffer);
-    (*types[type].frame)();
+  unsigned long i;
+  stereo_sample_t *p = buffer;
+  for (i = 0; i < sample_count; i++) {
+    (*types[type].sample)(p);
+    p++;
+  }
+  wavedump_append(&song_dump, sample_count * sizeof(stereo_sample_t), buffer);
+  (*types[type].frame)();
 }
 
-static void intr_handler(int sig) {
-    ao_song_done = 1;
-}
+static void intr_handler(int sig) { ao_song_done = 1; }
 
 #if defined(WIN32) && !defined(NOGUI)
 unsigned long __stdcall debug_thread(void *param) {
-    debug_hw_t *hw = (debug_hw_t *)param;
-    if (debug_start()) {
-        while (!ao_song_done) {
-            ao_song_done |= debug_frame(hw);
-        }
+  debug_hw_t *hw = (debug_hw_t *)param;
+  if (debug_start()) {
+    while (!ao_song_done) {
+      ao_song_done |= debug_frame(hw);
     }
-    return 0;
+  }
+  return 0;
 }
 #endif
 
 int main(int argc, const char *argv[]) {
-    FILE *file;
-    uint8 *buffer;
-    uint32 size, filesig;
-    char *device = NULL;
-    int list_devices = false;
-    int nogui = false;
-    // int nomidi = false; // declared as a global in mididump.c
+  FILE *file;
+  uint8 *buffer;
+  uint32 size, filesig;
+  char *device = NULL;
+  int list_devices = false;
+  int nogui = false;
+  // int nomidi = false; // declared as a global in mididump.c
 #ifndef NOPLAY
-    int noplay = false;
+  int noplay = false;
 #endif
-    int nosamples = false;
-    int nowave = false;
+  int nosamples = false;
+  int nowave = false;
 
-    const char *const usages[] = {"aosdk filename", NULL};
+  const char *const usages[] = {"aosdk filename", NULL};
 
-    struct argparse_option options[] = {
-        OPT_HELP(),
+  struct argparse_option options[] = {
+      OPT_HELP(),
 #ifdef WIN32
-        OPT_STRING('d', "device", &device, "name of the playback device"),
+      OPT_STRING('d', "device", &device, "name of the playback device"),
 #ifndef NOPLAY
-        OPT_BOOLEAN(
-            '\0', "list-devices", &list_devices,
-            "list all available playback devices that can be passed to -d"),
+      OPT_BOOLEAN(
+          '\0', "list-devices", &list_devices,
+          "list all available playback devices that can be passed to -d"),
 #endif
 #endif
 #ifndef NOGUI
-        OPT_BOOLEAN('g', "nogui", &nogui, "don't show the debugging GUI"),
+      OPT_BOOLEAN('g', "nogui", &nogui, "don't show the debugging GUI"),
 #endif
-        OPT_BOOLEAN('m', "nomidi", &nomidi, "don't dump the song to a .mid file"),
+      OPT_BOOLEAN('m', "nomidi", &nomidi, "don't dump the song to a .mid file"),
 #ifndef NOPLAY
-        OPT_BOOLEAN('p', "noplay", &noplay, "don't play back the song"),
+      OPT_BOOLEAN('p', "noplay", &noplay, "don't play back the song"),
 #endif
-        OPT_BOOLEAN('s', "nosamples", &nosamples,
-                    "don't dump any instrument samples"),
-        OPT_BOOLEAN('w', "nowave", &nowave, "don't dump the song to a .wav file"),
-        OPT_END()
-    };
+      OPT_BOOLEAN('s', "nosamples", &nosamples,
+                  "don't dump any instrument samples"),
+      OPT_BOOLEAN('w', "nowave", &nowave, "don't dump the song to a .wav file"),
+      OPT_END()};
 
-    struct argparse argparse;
-    argparse_init(&argparse, options, usages, 0);
-    argparse_describe(
-        &argparse,
-        "\n"
-        "AOSDK test program v1.0 by R. Belmont [AOSDK release 1.4.8]\n"
-        "Copyright (c) 2007-2009 R. Belmont and Richard Bannister - please read "
-        "license.txt for license details",
-        NULL);
+  struct argparse argparse;
+  argparse_init(&argparse, options, usages, 0);
+  argparse_describe(
+      &argparse,
+      "\n"
+      "AOSDK test program v1.0 by R. Belmont [AOSDK release 1.4.8]\n"
+      "Copyright (c) 2007-2009 R. Belmont and Richard Bannister - please read "
+      "license.txt for license details",
+      NULL);
 
-    argc = argparse_parse(&argparse, argc, argv);
+  argc = argparse_parse(&argparse, argc, argv);
 
 #ifndef NOPLAY
-    if (list_devices) {
-        printf("Available output devices:\n");
-        m1sdr_PrintDevices();
-        return 0;
-    }
+  if (list_devices) {
+    printf("Available output devices:\n");
+    m1sdr_PrintDevices();
+    return 0;
+  }
 #endif
 
-    // check if an argument was given
-    if (argc < 1) {
-        argparse_usage(&argparse);
-        return -1;
-    }
+  // check if an argument was given
+  if (argc < 1) {
+    argparse_usage(&argparse);
+    return -1;
+  }
 
-    file = ao_fopen(argv[0], "rb");
+  file = ao_fopen(argv[0], "rb");
 
-    if (!file) {
-        printf("ERROR: could not open file %s\n", argv[0]);
-        return -1;
-    }
+  if (!file) {
+    printf("ERROR: could not open file %s\n", argv[0]);
+    return -1;
+  }
 
-    if (!nosamples) {
-        sampledump_init();
-    }
+  if (!nosamples) {
+    sampledump_init();
+  }
 
-    // get the length of the file by seeking to the end then reading the current
-    // position
-    fseek(file, 0, SEEK_END);
-    size = ftell(file);
-    // reset the pointer
-    fseek(file, 0, SEEK_SET);
+  // get the length of the file by seeking to the end then reading the current
+  // position
+  fseek(file, 0, SEEK_END);
+  size = ftell(file);
+  // reset the pointer
+  fseek(file, 0, SEEK_SET);
 
-    buffer = malloc(size);
+  buffer = malloc(size);
 
-    if (!buffer) {
-        fclose(file);
-        printf("ERROR: could not allocate %d bytes of memory\n", size);
-        return -1;
-    }
-
-    // read the file
-    fread(buffer, size, 1, file);
+  if (!buffer) {
     fclose(file);
+    printf("ERROR: could not allocate %d bytes of memory\n", size);
+    return -1;
+  }
 
-    // now try to identify the file
-    type = 0;
-    filesig = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
-    while (types[type].sig != 0xffffffff) {
-        if (filesig == types[type].sig) {
-            break;
-        } else {
-            type++;
-        }
-    }
+  // read the file
+  fread(buffer, size, 1, file);
+  fclose(file);
 
-    // now did we identify it above or just fall through?
-    if (types[type].sig != 0xffffffff) {
-        printf("File identified as %s\n", types[type].name);
+  // now try to identify the file
+  type = 0;
+  filesig = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+  while (types[type].sig != 0xffffffff) {
+    if (filesig == types[type].sig) {
+      break;
     } else {
-        printf("ERROR: File is unknown, signature bytes are %02x %02x %02x %02x\n",
-               buffer[0], buffer[1], buffer[2], buffer[3]);
-        free(buffer);
-        return -1;
+      type++;
     }
+  }
 
-    if ((*types[type].start)(buffer, size) != AO_SUCCESS) {
-        free(buffer);
-        printf("ERROR: Engine rejected file!\n");
-        return -1;
-    }
+  // now did we identify it above or just fall through?
+  if (types[type].sig != 0xffffffff) {
+    printf("File identified as %s\n", types[type].name);
+  } else {
+    printf("ERROR: File is unknown, signature bytes are %02x %02x %02x %02x\n",
+           buffer[0], buffer[1], buffer[2], buffer[3]);
+    free(buffer);
+    return -1;
+  }
 
-    if (!nowave && wavedump_open(&song_dump, argv[0])) {
-        printf("Dumping to %s%s.\n", argv[0], ".wav");
-    }
+  if ((*types[type].start)(buffer, size) != AO_SUCCESS) {
+    free(buffer);
+    printf("ERROR: Engine rejected file!\n");
+    return -1;
+  }
 
-    signal(SIGINT, intr_handler);
+  if (!nowave && wavedump_open(&song_dump, argv[0])) {
+    printf("Dumping to %s%s.\n", argv[0], ".wav");
+  }
+
+  signal(SIGINT, intr_handler);
 
 #ifndef NOGUI
-    if (!nogui) {
+  if (!nogui) {
 #ifdef WIN32
-        // Who needs Windows.h, anyway?
-        void *__stdcall CreateThread(
-            void *lpThreadAttributes, size_t dwStackSize,
-            unsigned long(__stdcall * lpStartAddress)(void *), void *lpParameter,
-            unsigned long dwCreationFlags, unsigned long *lpThreadId);
-        CreateThread(NULL, 0, debug_thread, debug[type], 0, NULL);
+    // Who needs Windows.h, anyway?
+    void *__stdcall CreateThread(
+        void *lpThreadAttributes, size_t dwStackSize,
+        unsigned long(__stdcall * lpStartAddress)(void *), void *lpParameter,
+        unsigned long dwCreationFlags, unsigned long *lpThreadId);
+    CreateThread(NULL, 0, debug_thread, debug[type], 0, NULL);
 #else
-        nogui = !debug_start();
+    nogui = !debug_start();
 #endif
-    }
+  }
 #else
-    nogui = true;
+  nogui = true;
 #endif
 
+#ifndef NOPLAY
+  if (!noplay) {
+    m1sdr_Init(device, 44100);
+    m1sdr_SetCallback(do_frame);
+    m1sdr_PlayStart();
+    printf("Playing.  ");
+  }
+#endif
+  printf("Press CTRL-C %sto stop.\n",
+         nogui ? "" : "or close the debug window ");
+
+  while (!ao_song_done) {
+    m1sdr_ret_t ret = M1SDR_OK;
 #ifndef NOPLAY
     if (!noplay) {
-        m1sdr_Init(device, 44100);
-        m1sdr_SetCallback(do_frame);
-        m1sdr_PlayStart();
-        printf("Playing.  ");
+      ret = m1sdr_TimeCheck();
+    } else
+#endif
+    {
+      stereo_sample_t buffer[44100 / 60];
+      do_frame(sizeof(buffer) / sizeof(stereo_sample_t), buffer);
     }
-#endif
-    printf("Press CTRL-C %sto stop.\n",
-           nogui ? "" : "or close the debug window ");
-
-    while (!ao_song_done) {
-        m1sdr_ret_t ret = M1SDR_OK;
-#ifndef NOPLAY
-        if (!noplay) {
-            ret = m1sdr_TimeCheck();
-        } else
-#endif
-        {
-            stereo_sample_t buffer[44100 / 60];
-            do_frame(sizeof(buffer) / sizeof(stereo_sample_t), buffer);
-        }
 #if !defined(NOGUI) && !defined(WIN32)
-        if (!nogui) {
-            ao_song_done |= debug_frame(debug[type]);
-        } else
-#endif
-            if (ret == M1SDR_WAIT) {
-                ao_sleep(50);
-            }
-    }
-
-    signal(SIGINT, SIG_IGN);
-    wavedump_finish(&song_dump, 44100, 16, 2);
-
-    free(buffer);
-
-    if (!nomidi) {
-        mididump_write(argv[0]);
-    }
-#ifndef NOGUI
     if (!nogui) {
-        debug_stop();
-    }
+      ao_song_done |= debug_frame(debug[type]);
+    } else
 #endif
-    return 1;
+        if (ret == M1SDR_WAIT) {
+      ao_sleep(50);
+    }
+  }
+
+  signal(SIGINT, SIG_IGN);
+  wavedump_finish(&song_dump, 44100, 16, 2);
+
+  free(buffer);
+
+  if (!nomidi) {
+    mididump_write(argv[0]);
+  }
+#ifndef NOGUI
+  if (!nogui) {
+    debug_stop();
+  }
+#endif
+  return 1;
 }
 
 // stub for MAME stuff
-int change_pc(int foo) {
-    return 0;
-}
+int change_pc(int foo) { return 0; }
