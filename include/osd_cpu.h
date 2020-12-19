@@ -60,21 +60,21 @@
  ******************************************************************************/
 typedef union {
 #if LSB_FIRST
-  struct {
-    UINT8 l, h, h2, h3;
-  } b;
-  struct {
-    UINT16 l, h;
-  } w;
+    struct {
+        UINT8 l, h, h2, h3;
+    } b;
+    struct {
+        UINT16 l, h;
+    } w;
 #else
-  struct {
-    UINT8 h3, h2, h, l;
-  } b;
-  struct {
-    UINT16 h, l;
-  } w;
+    struct {
+        UINT8 h3, h2, h, l;
+    } b;
+    struct {
+        UINT16 h, l;
+    } w;
 #endif
-  UINT32 d;
+    UINT32 d;
 } PAIR;
 
 #endif /* defined OSD_CPU_H */
