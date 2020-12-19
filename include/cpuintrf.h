@@ -609,15 +609,15 @@ enum {
   CPUINFO_INT_MAX_CYCLES, /* R/O: maximum cycles for a single instruction */
 
   CPUINFO_INT_DATABUS_WIDTH, /* R/O: data bus size for each address space
-                              (8,16,32,64) */
+                            (8,16,32,64) */
   CPUINFO_INT_DATABUS_WIDTH_LAST =
       CPUINFO_INT_DATABUS_WIDTH + ADDRESS_SPACES - 1,
   CPUINFO_INT_ADDRBUS_WIDTH, /* R/O: address bus size for each address space
-                              (12-32) */
+                            (12-32) */
   CPUINFO_INT_ADDRBUS_WIDTH_LAST =
       CPUINFO_INT_ADDRBUS_WIDTH + ADDRESS_SPACES - 1,
   CPUINFO_INT_ADDRBUS_SHIFT, /* R/O: shift applied to addresses each address
-                              space (+3 means >>3, -1 means <<1) */
+                            space (+3 means >>3, -1 means <<1) */
   CPUINFO_INT_ADDRBUS_SHIFT_LAST =
       CPUINFO_INT_ADDRBUS_SHIFT + ADDRESS_SPACES - 1,
 
@@ -639,7 +639,7 @@ enum {
   CPUINFO_PTR_FIRST = 0x10000,
 
   CPUINFO_PTR_SET_INFO = CPUINFO_PTR_FIRST, /* R/O: void (*set_info)(UINT32
-                                             state, INT64 data, void *ptr) */
+                                           state, INT64 data, void *ptr) */
   CPUINFO_PTR_GET_CONTEXT,  /* R/O: void (*get_context)(void *buffer) */
   CPUINFO_PTR_SET_CONTEXT,  /* R/O: void (*set_context)(void *buffer) */
   CPUINFO_PTR_INIT,         /* R/O: void (*init)(void) */
@@ -657,7 +657,7 @@ enum {
   CPUINFO_PTR_INTERNAL_MEMORY_MAP_LAST =
       CPUINFO_PTR_INTERNAL_MEMORY_MAP + ADDRESS_SPACES - 1,
   CPUINFO_PTR_DEBUG_REGISTER_LIST, /* R/O: int *list: list of registers for
-                                    NEW_DEBUGGER */
+                                  NEW_DEBUGGER */
 
   CPUINFO_PTR_CPU_SPECIFIC = 0x18000, /* R/W: CPU-specific values start here */
 
@@ -672,7 +672,7 @@ enum {
   CPUINFO_STR_CORE_CREDITS,             /* R/O: credits for the CPU core */
   CPUINFO_STR_FLAGS,    /* R/O: string representation of the main flags value */
   CPUINFO_STR_REGISTER, /* R/O: string representation of up to MAX_REGs
-                         registers */
+                       registers */
   CPUINFO_STR_REGISTER_LAST = CPUINFO_STR_REGISTER + MAX_REGS - 1,
 
   CPUINFO_STR_CPU_SPECIFIC = 0x28000 /* R/W: CPU-specific values start here */
