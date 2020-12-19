@@ -14,11 +14,11 @@ extern "C" {
 #endif
 
 typedef struct {
-  hashtable_t tags;
-  char *tag_buffer;
+    hashtable_t tags;
+    char *tag_buffer;
 
-  uint32 *res_section;
-  uint32 res_size;
+    uint32 *res_section;
+    uint32 res_size;
 } corlett_t;
 
 // Engine-specific callback function called during corlett_decode() for all
