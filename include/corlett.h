@@ -15,11 +15,11 @@ extern "C" {
 
 typedef struct
 {
-	hashtable_t tags;
-	char *tag_buffer;
+    hashtable_t tags;
+    char *tag_buffer;
 
-	uint32 *res_section;
-	uint32 res_size;
+    uint32 *res_section;
+    uint32 res_size;
 } corlett_t;
 
 // Engine-specific callback function called during corlett_decode() for all
@@ -33,7 +33,7 @@ typedef struct
 //
 // All pointers passed for [lib] and [c] stay valid until after the final
 // callback for library #0. This allows the callback function to change the
-// order in which to process the libraries by caching the pointers 
+// order in which to process the libraries by caching the pointers
 // applying their data in later calls.
 //
 // The function should return either AO_SUCCESS, or AO_FAIL if an error

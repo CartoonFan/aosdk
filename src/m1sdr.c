@@ -13,15 +13,15 @@ ao_bool hw_present;
 
 void m1sdr_SetCallback(m1sdr_callback_t *function)
 {
-	if (function == NULL)
-	{
-		printf("ERROR: NULL CALLBACK!\n");
-	}
+    if (function == NULL)
+    {
+        printf("ERROR: NULL CALLBACK!\n");
+    }
 
-	m1sdr_Callback = function;
+    m1sdr_Callback = function;
 }
 
 ao_bool m1sdr_HwPresent(void)
 {
-	return hw_present;
+    return hw_present;
 }

@@ -17,24 +17,24 @@
 
 enum
 {
-	COMMAND_NONE = 0,
-	COMMAND_PREV,
-	COMMAND_NEXT,
-	COMMAND_RESTART,
-	COMMAND_HAS_PREV,
-	COMMAND_HAS_NEXT,
-	COMMAND_GET_MIN,
-	COMMAND_GET_MAX,
-	COMMAND_JUMP
+    COMMAND_NONE = 0,
+    COMMAND_PREV,
+    COMMAND_NEXT,
+    COMMAND_RESTART,
+    COMMAND_HAS_PREV,
+    COMMAND_HAS_NEXT,
+    COMMAND_GET_MIN,
+    COMMAND_GET_MAX,
+    COMMAND_JUMP
 };
 
 /* Compiler defines for Xcode */
 #ifdef __BIG_ENDIAN__
-	#undef LSB_FIRST
+#undef LSB_FIRST
 #endif
 
 #ifdef __LITTLE_ENDIAN__
-	#define LSB_FIRST	1
+#define LSB_FIRST	1
 #endif
 
 typedef unsigned char ao_bool;
@@ -77,8 +77,8 @@ typedef unsigned char ao_bool;
 
 typedef struct
 {
-	const char *title[9];
-	const char *info[9];
+    const char *title[9];
+    const char *info[9];
 } ao_display_info;
 
 typedef unsigned char		uint8;
@@ -136,29 +136,29 @@ typedef unsigned long long	UINT64;
 
 INLINE uint16 SWAP16(uint16 x)
 {
-	return (
-		((x & 0xFF00) >> 8) |
-		((x & 0x00FF) << 8)
-	);
+    return (
+               ((x & 0xFF00) >> 8) |
+               ((x & 0x00FF) << 8)
+           );
 }
 
 INLINE uint32 SWAP24(uint32 x)
 {
-	return (
-		((x & 0xFF0000) >> 16) |
-		((x & 0x00FF00) << 0) |
-		((x & 0x0000FF) << 16)
-	);
+    return (
+               ((x & 0xFF0000) >> 16) |
+               ((x & 0x00FF00) << 0) |
+               ((x & 0x0000FF) << 16)
+           );
 }
 
 INLINE uint32 SWAP32(uint32 x)
 {
-	return (
-		((x & 0xFF000000) >> 24) |
-		((x & 0x00FF0000) >> 8) |
-		((x & 0x0000FF00) << 8) |
-		((x & 0x000000FF) << 24)
-	);
+    return (
+               ((x & 0xFF000000) >> 24) |
+               ((x & 0x00FF0000) >> 8) |
+               ((x & 0x0000FF00) << 8) |
+               ((x & 0x000000FF) << 24)
+           );
 }
 
 #if LSB_FIRST
@@ -185,8 +185,8 @@ INLINE uint32 SWAP32(uint32 x)
 #endif
 
 typedef struct {
-	int16 l;
-	int16 r;
+    int16 l;
+    int16 r;
 } stereo_sample_t;
 
 int ao_get_lib(const char *filename, uint8 **buffer, uint64 *length);
