@@ -9,9 +9,9 @@
 #pragma once
 
 typedef struct {
-  FILE *file;
-  uint32 loop_sample;
-  uint32 data_size;
+    FILE *file;
+    uint32 loop_sample;
+    uint32 data_size;
 } wavedump_t;
 
 ao_bool wavedump_open(wavedump_t *wave, const char *fn);
