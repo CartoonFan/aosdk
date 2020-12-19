@@ -49,13 +49,13 @@ typedef struct {
 } CUEHEADER;
 
 typedef struct {
-  uint32 dwName;         // unique identification value
-  uint32 dwPosition;     // play order position
-  uint32 fccChunk;       // RIFF ID of corresponding data chunk
-  uint32 dwChunkStart;   // offset from [fccChunk] to the LIST chunk, or 0 if no
-                         // such chunk is present
-  uint32 dwBlockStart;   // offset from [fccChunk] to a (unspecified) "block"
-                         // containing the sample
+  uint32 dwName;       // unique identification value
+  uint32 dwPosition;   // play order position
+  uint32 fccChunk;     // RIFF ID of corresponding data chunk
+  uint32 dwChunkStart; // offset from [fccChunk] to the LIST chunk, or 0 if no
+  // such chunk is present
+  uint32 dwBlockStart; // offset from [fccChunk] to a (unspecified) "block"
+  // containing the sample
   uint32 dwSampleOffset; // offset from [dwBlockStart] to the sample
 } CUEPOINT;
 

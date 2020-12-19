@@ -19,7 +19,8 @@
  ** A   - The type of operand 1 * B   - The type of operand 2 (if binary
  *operation)		   *
  *																			   *
- *				     Each type is one of: U8,8,U16,16,U32,32,U64,64
+ *				     Each type is one of:
+ *U8,8,U16,16,U32,32,U64,64
  **
  *																			   *
  *******************************************************************************/
