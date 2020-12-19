@@ -61,53 +61,51 @@ static stereo_sample_t samples[44100];
 
 // set # of samples per update
 
-void m1sdr_SetSamplesPerTick(UINT32 spf) {
-    nDSoundSegLen = spf;
-}
+void m1sdr_SetSamplesPerTick(UINT32 spf) { nDSoundSegLen = spf; }
 
 // m1sdr_Update - timer callback routine: runs sequencer and mixes sound
 
 void m1sdr_Update(void) {
-    if (!hw_present)
-        return;
+  if (!hw_present)
+    return;
 
-    if (m1sdr_Callback) {
-        m1sdr_Callback(nDSoundSegLen, samples);
-    }
+  if (m1sdr_Callback) {
+    m1sdr_Callback(nDSoundSegLen, samples);
+  }
 }
 // checks the play position to see if we should trigger another update
 
 m1sdr_ret_t m1sdr_TimeCheck(void) {
 #if VALGRIND
-    m1sdr_Update();
+  m1sdr_Update();
 #else
-    audio_buf_info info;
+  audio_buf_info info;
 
-    ioctl(audiofd, SNDCTL_DSP_GETOSPACE, &info);
+  ioctl(audiofd, SNDCTL_DSP_GETOSPACE, &info);
 
-    if (oss_nw) {
-        int err;
+  if (oss_nw) {
+    int err;
 
-        m1sdr_Update();
+    m1sdr_Update();
 
-        // output the generated samples
-        err = write(audiofd, samples, nDSoundSegLen * 4);
-        if (err == -1) {
-            perror("write\n");
-        }
-    } else {
-        while (info.bytes >= (nDSoundSegLen * 4)) {
-            m1sdr_Update();
-
-            // output the generated samples
-            write(audiofd, samples, nDSoundSegLen * 4);
-
-            ioctl(audiofd, SNDCTL_DSP_GETOSPACE, &info);
-        }
+    // output the generated samples
+    err = write(audiofd, samples, nDSoundSegLen * 4);
+    if (err == -1) {
+      perror("write\n");
     }
+  } else {
+    while (info.bytes >= (nDSoundSegLen * 4)) {
+      m1sdr_Update();
+
+      // output the generated samples
+      write(audiofd, samples, nDSoundSegLen * 4);
+
+      ioctl(audiofd, SNDCTL_DSP_GETOSPACE, &info);
+    }
+  }
 
 #endif
-    return M1SDR_WAIT;
+  return M1SDR_WAIT;
 }
 
 void m1sdr_PrintDevices(void) {}
@@ -115,74 +113,74 @@ void m1sdr_PrintDevices(void) {}
 // m1sdr_Init - inits the output device and our global state
 
 INT16 m1sdr_Init(char *device, int sample_rate) {
-    int format, stereo, rate, fsize;
+  int format, stereo, rate, fsize;
 
-    hw_present = 0;
+  hw_present = 0;
 
-    nDSoundSegLen = sample_rate / 60;
+  nDSoundSegLen = sample_rate / 60;
 
-    memset(samples, 0, sizeof(samples)); // zero out samples
+  memset(samples, 0, sizeof(samples)); // zero out samples
 
-    audiofd = open("/dev/dsp", O_WRONLY, 0);
+  audiofd = open("/dev/dsp", O_WRONLY, 0);
+  if (audiofd == -1) {
+    perror("/dev/dsp");
+
+    audiofd = open("/dev/dsp1", O_WRONLY, 0);
+
     if (audiofd == -1) {
-        perror("/dev/dsp");
-
-        audiofd = open("/dev/dsp1", O_WRONLY, 0);
-
-        if (audiofd == -1) {
-            perror("/dev/dsp1");
-            return (0);
-        }
+      perror("/dev/dsp1");
+      return (0);
     }
+  }
 
-    // reset things
-    ioctl(audiofd, SNDCTL_DSP_RESET, 0);
+  // reset things
+  ioctl(audiofd, SNDCTL_DSP_RESET, 0);
 
-    is_broken_driver = 0;
-    num_frags = NUM_FRAGS_NORMAL;
+  is_broken_driver = 0;
+  num_frags = NUM_FRAGS_NORMAL;
 
-    // set the buffer size we want
-    fsize = OSS_FRAGMENT;
-    if (ioctl(audiofd, SNDCTL_DSP_SETFRAGMENT, &fsize) == -1) {
-        perror("SNDCTL_DSP_SETFRAGMENT");
-        return (0);
-    }
+  // set the buffer size we want
+  fsize = OSS_FRAGMENT;
+  if (ioctl(audiofd, SNDCTL_DSP_SETFRAGMENT, &fsize) == -1) {
+    perror("SNDCTL_DSP_SETFRAGMENT");
+    return (0);
+  }
 
-    // set 16-bit output
-    format = AFMT_S16_NE; // 16 bit signed "native"-endian
-    if (ioctl(audiofd, SNDCTL_DSP_SETFMT, &format) == -1) {
-        perror("SNDCTL_DSP_SETFMT");
-        return (0);
-    }
+  // set 16-bit output
+  format = AFMT_S16_NE; // 16 bit signed "native"-endian
+  if (ioctl(audiofd, SNDCTL_DSP_SETFMT, &format) == -1) {
+    perror("SNDCTL_DSP_SETFMT");
+    return (0);
+  }
 
-    // now set stereo
-    stereo = 1;
-    if (ioctl(audiofd, SNDCTL_DSP_STEREO, &stereo) == -1) {
-        perror("SNDCTL_DSP_STEREO");
-        return (0);
-    }
+  // now set stereo
+  stereo = 1;
+  if (ioctl(audiofd, SNDCTL_DSP_STEREO, &stereo) == -1) {
+    perror("SNDCTL_DSP_STEREO");
+    return (0);
+  }
 
-    // and the sample rate
-    rate = sample_rate;
-    if (ioctl(audiofd, SNDCTL_DSP_SPEED, &rate) == -1) {
-        perror("SNDCTL_DSP_SPEED");
-        return (0);
-    }
+  // and the sample rate
+  rate = sample_rate;
+  if (ioctl(audiofd, SNDCTL_DSP_SPEED, &rate) == -1) {
+    perror("SNDCTL_DSP_SPEED");
+    return (0);
+  }
 
-    // and make sure that did what we wanted
-    ioctl(audiofd, SNDCTL_DSP_GETBLKSIZE, &fsize);
-    // printf("Fragment size: %d\n", fsize);
+  // and make sure that did what we wanted
+  ioctl(audiofd, SNDCTL_DSP_GETBLKSIZE, &fsize);
+  // printf("Fragment size: %d\n", fsize);
 
-    hw_present = 1;
+  hw_present = 1;
 
-    return (1);
+  return (1);
 }
 
 void m1sdr_Exit(void) {
-    if (!hw_present)
-        return;
+  if (!hw_present)
+    return;
 
-    close(audiofd);
+  close(audiofd);
 }
 
 // unused stubs for this driver, but the Win32 driver needs them
@@ -191,11 +189,9 @@ void m1sdr_PlayStart(void) {}
 void m1sdr_PlayStop(void) {}
 
 void m1sdr_FlushAudio(void) {
-    memset(samples, 0, nDSoundSegLen * 4);
-    write(audiofd, samples, nDSoundSegLen * 4);
-    write(audiofd, samples, nDSoundSegLen * 4);
+  memset(samples, 0, nDSoundSegLen * 4);
+  write(audiofd, samples, nDSoundSegLen * 4);
+  write(audiofd, samples, nDSoundSegLen * 4);
 }
 
-void m1sdr_SetNoWait(int nw) {
-    oss_nw = nw;
-}
+void m1sdr_SetNoWait(int nw) { oss_nw = nw; }
