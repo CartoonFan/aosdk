@@ -9,23 +9,22 @@
 
 #include <stdio.h>
 
-#define AO_SUCCESS					1
-#define AO_FAIL						0
-#define AO_FAIL_DECOMPRESSION		-1
+#define AO_SUCCESS 1
+#define AO_FAIL 0
+#define AO_FAIL_DECOMPRESSION -1
 
-#define AUDIO_RATE					(44100)
+#define AUDIO_RATE (44100)
 
-enum
-{
-    COMMAND_NONE = 0,
-    COMMAND_PREV,
-    COMMAND_NEXT,
-    COMMAND_RESTART,
-    COMMAND_HAS_PREV,
-    COMMAND_HAS_NEXT,
-    COMMAND_GET_MIN,
-    COMMAND_GET_MAX,
-    COMMAND_JUMP
+enum {
+  COMMAND_NONE = 0,
+  COMMAND_PREV,
+  COMMAND_NEXT,
+  COMMAND_RESTART,
+  COMMAND_HAS_PREV,
+  COMMAND_HAS_NEXT,
+  COMMAND_GET_MIN,
+  COMMAND_GET_MAX,
+  COMMAND_JUMP
 };
 
 /* Compiler defines for Xcode */
@@ -34,17 +33,17 @@ enum
 #endif
 
 #ifdef __LITTLE_ENDIAN__
-#define LSB_FIRST	1
+#define LSB_FIRST 1
 #endif
 
 typedef unsigned char ao_bool;
 
 #ifdef __GNUC__
-#include <stddef.h>	// get NULL
 #include <stdbool.h>
+#include <stddef.h> // get NULL
 
 #ifndef TRUE
-#define TRUE  (1)
+#define TRUE (1)
 #endif
 #ifndef FALSE
 #define FALSE (0)
@@ -53,10 +52,10 @@ typedef unsigned char ao_bool;
 #endif
 
 #ifdef _MSC_VER
-#include <stddef.h>	// get NULL
+#include <stddef.h> // get NULL
 
 #ifndef TRUE
-#define TRUE  (1)
+#define TRUE (1)
 #endif
 #ifndef FALSE
 #define FALSE (0)
@@ -72,51 +71,50 @@ typedef unsigned char ao_bool;
 #define countof(arr) (sizeof(arr) / sizeof(arr[0]))
 
 #ifndef PATH_MAX
-#define PATH_MAX	2048
+#define PATH_MAX 2048
 #endif
 
-typedef struct
-{
-    const char *title[9];
-    const char *info[9];
+typedef struct {
+  const char *title[9];
+  const char *info[9];
 } ao_display_info;
 
-typedef unsigned char		uint8;
-typedef unsigned char		UINT8;
-typedef signed char			int8;
-typedef signed char			INT8;
-typedef unsigned short		uint16;
-typedef unsigned short		UINT16;
-typedef signed short		int16;
-typedef signed short		INT16;
-typedef signed int			int32;
-typedef unsigned int		uint32;
+typedef unsigned char uint8;
+typedef unsigned char UINT8;
+typedef signed char int8;
+typedef signed char INT8;
+typedef unsigned short uint16;
+typedef unsigned short UINT16;
+typedef signed short int16;
+typedef signed short INT16;
+typedef signed int int32;
+typedef unsigned int uint32;
 #ifdef LONG_IS_64BIT
-typedef signed long             int64;
-typedef unsigned long           uint64;
+typedef signed long int64;
+typedef unsigned long uint64;
 #else
-typedef signed long long	int64;
-typedef unsigned long long	uint64;
+typedef signed long long int64;
+typedef unsigned long long uint64;
 #endif
 
 #ifdef WIN32
 #include "win32_utf8/src/entry.h"
 
 #ifndef _BASETSD_H
-typedef signed int			INT32;
-typedef unsigned int		UINT32;
-typedef signed long long	INT64;
-typedef unsigned long long	UINT64;
+typedef signed int INT32;
+typedef unsigned int UINT32;
+typedef signed long long INT64;
+typedef unsigned long long UINT64;
 #endif
 #else
-typedef signed int			INT32;
-typedef unsigned int		UINT32;
+typedef signed int INT32;
+typedef unsigned int UINT32;
 #ifdef LONG_IS_64BIT
-typedef signed long         INT64;
-typedef unsigned long       UINT64;
+typedef signed long INT64;
+typedef unsigned long UINT64;
 #else
-typedef signed long long	INT64;
-typedef unsigned long long	UINT64;
+typedef signed long long INT64;
+typedef unsigned long long UINT64;
 #endif
 #endif
 
@@ -134,31 +132,18 @@ typedef unsigned long long	UINT64;
 #endif
 #endif
 
-INLINE uint16 SWAP16(uint16 x)
-{
-    return (
-               ((x & 0xFF00) >> 8) |
-               ((x & 0x00FF) << 8)
-           );
+INLINE uint16 SWAP16(uint16 x) {
+  return (((x & 0xFF00) >> 8) | ((x & 0x00FF) << 8));
 }
 
-INLINE uint32 SWAP24(uint32 x)
-{
-    return (
-               ((x & 0xFF0000) >> 16) |
-               ((x & 0x00FF00) << 0) |
-               ((x & 0x0000FF) << 16)
-           );
+INLINE uint32 SWAP24(uint32 x) {
+  return (((x & 0xFF0000) >> 16) | ((x & 0x00FF00) << 0) |
+          ((x & 0x0000FF) << 16));
 }
 
-INLINE uint32 SWAP32(uint32 x)
-{
-    return (
-               ((x & 0xFF000000) >> 24) |
-               ((x & 0x00FF0000) >> 8) |
-               ((x & 0x0000FF00) << 8) |
-               ((x & 0x000000FF) << 24)
-           );
+INLINE uint32 SWAP32(uint32 x) {
+  return (((x & 0xFF000000) >> 24) | ((x & 0x00FF0000) >> 8) |
+          ((x & 0x0000FF00) << 8) | ((x & 0x000000FF) << 24));
 }
 
 #if LSB_FIRST
@@ -185,8 +170,8 @@ INLINE uint32 SWAP32(uint32 x)
 #endif
 
 typedef struct {
-    int16 l;
-    int16 r;
+  int16 l;
+  int16 r;
 } stereo_sample_t;
 
 int ao_get_lib(const char *filename, uint8 **buffer, uint64 *length);
@@ -197,16 +182,16 @@ extern volatile ao_bool ao_song_done;
 
 /// Portability functions defined in ao.c
 /// -------------------------------------
-FILE* ao_fopen(const char *fn, const char *mode);
+FILE *ao_fopen(const char *fn, const char *mode);
 
 // We don't care about permissions, even on Linux
 int ao_mkdir(const char *dirname);
 
 void ao_sleep(unsigned int seconds);
 
-#define fopen ERROR_use_ao_fopen_instead!
-#define mkdir ERROR_Use_ao_mkdir_instead!
+#define fopen ERROR_use_ao_fopen_instead !
+#define mkdir ERROR_Use_ao_mkdir_instead !
 /// -------------------------------------
 
-#include "wavedump.h"
 #include "sampledump.h"
+#include "wavedump.h"
