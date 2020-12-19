@@ -609,15 +609,15 @@ enum {
   CPUINFO_INT_MAX_CYCLES, /* R/O: maximum cycles for a single instruction */
 
   CPUINFO_INT_DATABUS_WIDTH, /* R/O: data bus size for each address space
-                    (8,16,32,64) */
+                   (8,16,32,64) */
   CPUINFO_INT_DATABUS_WIDTH_LAST =
       CPUINFO_INT_DATABUS_WIDTH + ADDRESS_SPACES - 1,
   CPUINFO_INT_ADDRBUS_WIDTH, /* R/O: address bus size for each address space
-                    (12-32) */
+                   (12-32) */
   CPUINFO_INT_ADDRBUS_WIDTH_LAST =
       CPUINFO_INT_ADDRBUS_WIDTH + ADDRESS_SPACES - 1,
   CPUINFO_INT_ADDRBUS_SHIFT, /* R/O: shift applied to addresses each address
-                    space (+3 means >>3, -1 means <<1) */
+                   space (+3 means >>3, -1 means <<1) */
   CPUINFO_INT_ADDRBUS_SHIFT_LAST =
       CPUINFO_INT_ADDRBUS_SHIFT + ADDRESS_SPACES - 1,
 
