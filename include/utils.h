@@ -16,30 +16,30 @@
 // desired data size by calling hashtable_init().
 
 typedef struct {
-  void *buf;
-  size_t len;
+    void *buf;
+    size_t len;
 } blob_t;
 
 typedef struct hashtable_bucket {
-  struct hashtable_bucket *next;
-  blob_t key;
-  uint8 data[0];
+    struct hashtable_bucket *next;
+    blob_t key;
+    uint8 data[0];
 } hashtable_bucket_t;
 
 typedef struct {
-  unsigned int i;
-  hashtable_bucket_t *bucket;
+    unsigned int i;
+    hashtable_bucket_t *bucket;
 } hashtable_iterator_t;
 
 typedef struct {
-  size_t data_size;
-  hashtable_bucket_t *buckets;
+    size_t data_size;
+    hashtable_bucket_t *buckets;
 } hashtable_t;
 
 // Flags used for hash table lookup
 typedef enum {
-  HT_CREATE = 0x1,           // create nonexisting entries
-  HT_CASE_INSENSITIVE = 0x2, // case-insensitive key lookup
+    HT_CREATE = 0x1,           // create nonexisting entries
+    HT_CASE_INSENSITIVE = 0x2, // case-insensitive key lookup
 } hashtable_flags_t;
 
 // Initializes the hash table with the given data size.
